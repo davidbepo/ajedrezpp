@@ -159,7 +159,7 @@ class Metapieza {
 
 class Metapeon : public Metapieza {
     public:
-    Metapeon(int columna, int fila, int color, Texture textura, string tipo) :
+    Metapeon(int columna, int fila, int color, const Texture& textura, string tipo) :
     Metapieza(columna, fila, color, textura, tipo) {}
     
     vector<Vector2i> puedemovera() override {
@@ -184,7 +184,7 @@ class Metapeon : public Metapieza {
 };
 class Metaballo : public Metapieza {
     public:
-    Metaballo(int num, int color, Texture textura, string tipo) :
+    Metaballo(int num, int color, const Texture& textura, string tipo) :
     Metapieza(colocaballo[num], filapieza[color], color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         int listaprobar[]={-2,-1,1,2};
@@ -205,7 +205,7 @@ class Metaballo : public Metapieza {
 
 class Metalfil : public Metapieza {
     public:
-    Metalfil(int num, int color, Texture textura, string tipo) :
+    Metalfil(int num, int color, const Texture& textura, string tipo) :
     Metapieza(colocalfil[num], filapieza[color], color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         casposibles = movdiagonal();
@@ -214,7 +214,7 @@ class Metalfil : public Metapieza {
 };
 class Metatorre : public Metapieza {
     public:
-    Metatorre(int num, int color, Texture textura, string tipo) :
+    Metatorre(int num, int color, const Texture& textura, string tipo) :
     Metapieza(colocatorre[num], filapieza[color] ,color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         casposibles = movlineal();
@@ -223,7 +223,7 @@ class Metatorre : public Metapieza {
 };
 class Metareina : public Metapieza {
     public:
-    Metareina(int color, Texture textura, string tipo) :
+    Metareina(int color, const Texture& textura, string tipo) :
     Metapieza(4, filapieza[color], color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         casposibles = movlineal();
@@ -234,7 +234,7 @@ class Metareina : public Metapieza {
 };
 class Metarey : public Metapieza {
     public:
-    Metarey(int color, Texture textura, string tipo) :
+    Metarey(int color, const Texture& textura, string tipo) :
     Metapieza(5, filapieza[color], color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         casposibles = movlineal(1);
@@ -246,75 +246,51 @@ class Metarey : public Metapieza {
 
 class Peonblanco : public Metapeon {
     public:
-    Peonblanco(int num) : Metapeon(num, 7, 1, tpb, "Peonblanco") {
-        foto.setTexture(tpb);
-    }
+    Peonblanco(int num) : Metapeon(num, 7, 1, tpb, "Peonblanco") {}
 };
 class Peonegro : public Metapeon {
     public:
-     Peonegro(int num) : Metapeon(num, 2, 2, tpn, "Peonegro") {
-        foto.setTexture(tpn);
-    }
+     Peonegro(int num) : Metapeon(num, 2, 2, tpn, "Peonegro") {}
 };
 class Caballoblanco : public Metaballo {
     public:
-    Caballoblanco(int num) : Metaballo(num, 1, tcb, "Caballoblanco") {
-        foto.setTexture(tcb);
-    }
+    Caballoblanco(int num) : Metaballo(num, 1, tcb, "Caballoblanco") {}
 };
 class Caballonegro : public Metaballo {
     public:
-     Caballonegro(int num) : Metaballo(num, 2, tcn, "Caballonegro"){
-        foto.setTexture(tcn);
-    }
+     Caballonegro(int num) : Metaballo(num, 2, tcn, "Caballonegro") {}
 };
 class Torreblanca : public Metatorre {
     public:
-    Torreblanca(int num) : Metatorre(num, 1, ttb, "Torreblanca") {
-        foto.setTexture(ttb);
-    }
+    Torreblanca(int num) : Metatorre(num, 1, ttb, "Torreblanca") {}
 };
 class Torrenegra : public Metatorre {
     public:
-    Torrenegra(int num) : Metatorre(num, 2, ttn, "Torrenegra") {
-        foto.setTexture(ttn);
-    }
+    Torrenegra(int num) : Metatorre(num, 2, ttn, "Torrenegra") {}
 };
 class Alfilblanco : public Metalfil {
     public:
-    Alfilblanco(int num) : Metalfil(num, 1, talb, "Alfilblanco") {
-        foto.setTexture(talb);
-    }
+    Alfilblanco(int num) : Metalfil(num, 1, talb, "Alfilblanco") {}
 };
 class Alfilnegro : public Metalfil {
     public:
-    Alfilnegro(int num) : Metalfil(num, 2, taln, "Alfilnegro") {
-        foto.setTexture(taln);
-    }
+    Alfilnegro(int num) : Metalfil(num, 2, taln, "Alfilnegro") {}
 };
 class Reyblanco : public Metarey {
     public:
-    Reyblanco() : Metarey(1, trb, "Reyblanco") {
-        foto.setTexture(trb);
-    }
+    Reyblanco() : Metarey(1, trb, "Reyblanco") {}
 };
 class Reynegro : public Metarey {
     public:
-    Reynegro() : Metarey(2, trn, "Reynegro"){
-        foto.setTexture(trn);
-    }
+    Reynegro() : Metarey(2, trn, "Reynegro") {}
 };
 class Reinablanca : public Metareina {
     public:
-    Reinablanca() : Metareina(1, tyb, "Reinablanca") {
-        foto.setTexture(tyb);
-    }
+    Reinablanca() : Metareina(1, tyb, "Reinablanca") {}
 };
 class Reinanegra : public Metareina {
     public:
-    Reinanegra() : Metareina(2, tyn, "Reinanegra"){
-        foto.setTexture(tyn);
-    }
+    Reinanegra() : Metareina(2, tyn, "Reinanegra") {}
 };
 
 void comepieza(Metapieza *pieza) {
@@ -358,24 +334,6 @@ int main() {
     Reynegro reynegro;
     Reinablanca reinablanca;
     Reinanegra reinanegra;
-    /*
-    //imprime el tablero(colores)
-    for(auto fila : colocupadas) {
-        for(auto color : fila) {
-                cout << color << " ";
-        }
-        cout << endl;
-    }
-    //imprime el tablero(objetos)
-    for(auto fila : ocupadas) {
-        for(Metapieza* pieza : fila) {
-            if(pieza)
-                cout << pieza->tipopieza << " ";
-            else
-                cout << "x ";
-        }
-        cout << endl;
-    }*/
 
     vector<Vector2i> click,posimov;
     Vector2i posraton,clicasilla,nuevacasilla;
