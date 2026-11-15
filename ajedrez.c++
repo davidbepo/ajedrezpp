@@ -13,7 +13,7 @@ int poscasilla[]={0,0,70,140,210,280,350,420,490,560,999};
 
 class Metapieza;
 
-array<array<Metapieza*, 8>, 8> ocupadas{};
+array<array<Metapieza*, 8>, 8> tablero{};
 array<array<int, 8>, 8> colocupadas{};
 
 int colocaballo[] = {0,2,7};
@@ -42,6 +42,7 @@ class Metapieza {
     int posy{};
     int color{};
     int movida{};
+    int enroque = 0;//0 ninguno,1 solo corto, 2 solo largo,3 ambos
     Sprite foto;
     string tipopieza="defecto";
     vector<Vector2i> casposibles;
@@ -59,11 +60,11 @@ class Metapieza {
         casposibles.clear();
         if(casx<9 and casy<9) {
             colocupadas[y-1][x-1] = this->color;
-            ocupadas[y-1][x-1] = this;
+            tablero[y-1][x-1] = this;
         }
     }
     void cambiasilla(int x, int y) {
-        ocupadas[casy-1][casx-1] = nullptr;
+        tablero[casy-1][casx-1] = nullptr;
         colocupadas[casy-1][casx-1] = 0;
         setpos(x,y);
         movida = 1;
@@ -195,7 +196,7 @@ class Metaballo : public Metapieza {
                         if (colocupadas[casy+y-1][casx+x-1] == 0 or 
                         colocupadas[casy+y-1][casx+x-1] == 3-color)
                             casposibles.push_back({casx+x,casy+y});
-                }
+                    }
                 }
             }
         }
@@ -234,12 +235,55 @@ class Metareina : public Metapieza {
 };
 class Metarey : public Metapieza {
     public:
+    
     Metarey(int color, const Texture& textura, string tipo) :
     Metapieza(5, filapieza[color], color, textura, tipo) {}
     vector<Vector2i> puedemovera() override {
         casposibles = movlineal(1);
         vector<Vector2i> casposibles2 = movdiagonal(1);
         casposibles.insert(casposibles.end(), casposibles2.begin(), casposibles2.end());
+        enroque=0;
+        if (movida == 0) {//si no se ha movido comprobar si el enroque es posible
+            if (color == 1) {
+                Metapieza* tbd = tablero[8-1][8-1];//torre blanca derecha
+                Metapieza* tbi = tablero[8-1][1-1];//torre blanca izquierda
+                if (tbd and colocupadas[casy-1][casx+1-1] == 0 
+                and colocupadas[casy-1][casx+2-1] == 0 
+                and tbd->tipopieza == "Torreblanca" 
+                and tbd->movida == 0) {//comprueba el enroque corto blanco
+                    enroque++;
+                    casposibles.push_back({casx+2,casy});
+                }
+                if (tbi and colocupadas[casy-1][casx-1-1] == 0 
+                and colocupadas[casy-1][casx-2-1] == 0
+                and colocupadas[casy-1][casx-3-1] == 0
+                and tbi->tipopieza == "Torreblanca" 
+                and tbi->movida == 0) {//comprueba el enroque largo blanco
+                    enroque+=2;
+                    casposibles.push_back({casx-2,casy});
+                }
+            }
+            if (color == 2) {
+                Metapieza* tnd = tablero[1-1][8-1];//torre negra derecha
+                Metapieza* tni = tablero[1-1][1-1];//torre negra izquierda
+                if (tnd and colocupadas[casy-1][casx+1-1] == 0 
+                and colocupadas[casy-1][casx+2-1] == 0 
+                and tnd->tipopieza == "Torrenegra" 
+                and tnd->movida == 0) {//comprueba el enroque corto negro
+                    enroque++;
+                    casposibles.push_back({casx+2,casy});
+                }
+                if (tni and colocupadas[casy-1][casx-1-1] == 0 
+                and colocupadas[casy-1][casx-2-1] == 0
+                and colocupadas[casy-1][casx-3-1] == 0
+                and tni->tipopieza == "Torrenegra" 
+                and tni->movida == 0) {//comprueba el enroque largo negro
+                    enroque+=2;
+                    casposibles.push_back({casx-2,casy});
+                }
+            }
+        } else
+            enroque = 0;
         return casposibles;
     }
 };
@@ -298,7 +342,7 @@ void comepieza(Metapieza *pieza) {
 }
 
 Metapieza *sacapieza(int casx, int casy) {
-    return ocupadas[casy-1][casx-1];
+    return tablero[casy-1][casx-1];
 }
 
 Vector2i sacasilla(Vector2i posraton) {
@@ -315,7 +359,7 @@ Vector2i sacasilla(Vector2i posraton) {
 int main() {
     RenderWindow ventana(VideoMode({560,560}), "ajedrez");
     const Texture ttablero("tablero-ajedrez.png");
-    Sprite tablero(ttablero);
+    Sprite fototablero(ttablero);
     const Texture tpuntoazul("puntoazul.png");
     Sprite puntoazul(tpuntoazul);
     const Texture tgblancas("gblancas.png");
@@ -369,9 +413,26 @@ int main() {
             posraton = click[1];
             nuevacasilla = sacasilla(posraton);
             if(std::find(posimov.begin(), posimov.end(), nuevacasilla) != posimov.end()) {//si el movimiento es valido
-                if (ocupadas[nuevacasilla.y-1][nuevacasilla.x-1] != nullptr)
+                if (tablero[nuevacasilla.y-1][nuevacasilla.x-1] != nullptr)
                     comepieza(sacapieza(nuevacasilla.x,nuevacasilla.y));// si la casilla de destino esta ocupada come la pieza
                 fichamover->cambiasilla(nuevacasilla.x, nuevacasilla.y);// mueve la pieza
+                
+                if (fichamover->tipopieza == "Reyblanco" and nuevacasilla.x == 7 
+                and (fichamover->enroque==1 or fichamover->enroque==3)) {//haz el enroque corto blanco
+                    tb2.cambiasilla(6,8);
+                }
+                if (fichamover->tipopieza == "Reyblanco" and nuevacasilla.x == 3 
+                and (fichamover->enroque==2 or fichamover->enroque==3)) {//haz el enroque largo blanco
+                    tb1.cambiasilla(4,8);
+                }
+                if (fichamover->tipopieza == "Reynegro" and nuevacasilla.x == 7 
+                and (fichamover->enroque==1 or fichamover->enroque==3)) {//haz el enroque corto negro
+                    tn2.cambiasilla(6,1);
+                }
+                if (fichamover->tipopieza == "Reynegro" and nuevacasilla.x == 3 
+                and (fichamover->enroque==2 or fichamover->enroque==3)) {//haz el enroque largo negro
+                    tn1.cambiasilla(4,1);
+                }
                 if(fichamover->color == 1)// cambia el turno
                     turno = "negras";
                 if(fichamover->color == 2)
@@ -382,9 +443,9 @@ int main() {
             fichamover = nullptr;
         }
         ventana.clear();
-        ventana.draw(tablero);
+        ventana.draw(fototablero);
         //pinta las piezas
-        for(auto fila : ocupadas) {
+        for(auto fila : tablero) {
             for(auto pieza : fila) {
                 if(pieza)
                     pieza->pintar(ventana);
